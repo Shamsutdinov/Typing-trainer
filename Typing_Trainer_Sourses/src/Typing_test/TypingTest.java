@@ -1,21 +1,17 @@
 package Typing_test;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import static javax.swing.JFrame.EXIT_ON_CLOSE;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.Timer;
@@ -29,17 +25,11 @@ public class TypingTest extends JFrame {
     private JLabel speed_label, time_label, mistake_label;
     private Timer timer;
     private final JButton start_button, stop_button;
-    private float time = 0;
-    private TypeSpeedCaster speed_caster;
-    private JOptionPane pane;
 
     public TypingTest() throws BadLocationException {
         super("Typing test");
 
         setSize(500, 400);
-
-        speed_caster = new TypeSpeedCaster();
-        pane = new JOptionPane();
 
         main_panel = new JPanel();
         main_panel.setLayout(new BorderLayout());
@@ -50,7 +40,7 @@ public class TypingTest extends JFrame {
         south_panel = new JPanel();
         task_panel = new TaskPanel();
         speed_label = new JLabel("0 Символов/мин");
-        time_label = new JLabel("0 Сек");
+        time_label = new JLabel("Время: 0 Сек");
         mistake_label = new JLabel("Ошибок: 0");
         start_button = new JButton("Начать");
         stop_button = new JButton("Остановить");
@@ -67,20 +57,18 @@ public class TypingTest extends JFrame {
         timer = new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                speed_caster.setTime((speed_caster.getTime() + 1));
-                time_label.setText((int) speed_caster.getTime() + " Сек");
-                speed_label.setText((int) speed_caster.getSpeed() + " Символов/мин");
+                task_panel.setTime((task_panel.getTime() + 1));
+                time_label.setText("Время: " + (int) task_panel.getTime() + " Сек");
+                speed_label.setText((int) task_panel.getSpeed() + " Символов/мин");
 
-                if (speed_caster.getTime() == 60) {
-                    speed_caster.setStarted(false);
-                    timer.stop();
-                    pane.showMessageDialog(null, "Время: " + (int) speed_caster.getTime()
-                            + System.lineSeparator() + "Скорость набора текста: "
-                            + (int) speed_caster.getSpeed() + System.lineSeparator()
-                            + "Ошибок: " + speed_caster.getMistake()
-                    );
-                    pane.requestFocus();
-                    speed_caster.reset();
+                if (task_panel.getTime() == 60) {
+                    try {
+                        task_panel.setStarted(false);
+                        timer.stop();
+                        task_panel.showInformationDialog();
+                        task_panel.reset();
+                    } catch (BadLocationException ex) {
+                    }
                 }
             }
         });
@@ -89,53 +77,38 @@ public class TypingTest extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    task_panel.resetText();
-                    speed_caster.setStarted(true);
+                    task_panel.reset();
+                    mistake_label.setText("Ошибок: " + task_panel.getMistakes_count());
+
+                    task_panel.setStarted(true);
                     timer.start();
                     main_panel.requestFocus();
                 } catch (BadLocationException ex) {
                 }
             }
         });
+
         stop_button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                timer.stop();
-                if (speed_caster.isStarted()) {
-                    pane.showMessageDialog(null, "Время: " + (int) speed_caster.getTime()
-                            + System.lineSeparator() + "Скорость набора текста: "
-                            + (int) speed_caster.getSpeed() + System.lineSeparator()
-                            + "Ошибок: " + speed_caster.getMistake()
-                    );
-                    pane.requestFocus();
+                try {
+                    timer.stop();
+                    if (task_panel.isStarted()) {
+                        task_panel.showInformationDialog();
+                    }
+                    task_panel.setStarted(false);
+                    task_panel.reset();
+                } catch (BadLocationException ex) {
                 }
-                speed_caster.setStarted(false);
-                speed_caster.reset();
             }
         });
 
         main_panel.addKeyListener(new KeyAdapter() {
             public void keyTyped(KeyEvent e) {
                 try {
-                    if (speed_caster.isStarted()) {
-                        String character = task_panel.getText(speed_caster.getTyped_symbols(), 1);
-                        if (character.charAt(0) == (e.getKeyChar())) {
-
-                            task_panel.getDocument().remove(speed_caster.getTyped_symbols(), 1);
-                            task_panel.appendToPane(speed_caster.getTyped_symbols(), character, Color.BLACK);
-                            speed_caster.typedCorrect();
-
-                            if (speed_caster.getTyped_symbols() >= task_panel.getDocument().getLength()) {
-                                task_panel.resetText();
-
-                            }
-                        } else {
-                            speed_caster.typedMistake();
-                            mistake_label.setText("Ошибок: " + speed_caster.getMistake());
-                        }
-                    }
+                    task_panel.typeDown(e);
+                    mistake_label.setText("Ошибок: " + task_panel.getMistakes_count());
                 } catch (BadLocationException ex) {
-                    Logger.getLogger(TypingTest.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         });
