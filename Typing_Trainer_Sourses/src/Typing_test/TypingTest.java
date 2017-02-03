@@ -4,9 +4,10 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -24,7 +25,7 @@ public class TypingTest extends JFrame {
     private TaskPanel task_panel;
     private JLabel speed_label, time_label, mistake_label;
     private Timer timer;
-    private final JButton start_button, stop_button;
+    private final JButton start_button, stop_button, dowload_text_button;
 
     public TypingTest() throws BadLocationException {
         super("Typing test");
@@ -39,11 +40,12 @@ public class TypingTest extends JFrame {
         center_panel = new JPanel(new FlowLayout());
         south_panel = new JPanel();
         task_panel = new TaskPanel();
-        speed_label = new JLabel("0 —ËÏ‚ÓÎÓ‚/ÏËÌ");
-        time_label = new JLabel("¬ÂÏˇ: 0 —ÂÍ");
-        mistake_label = new JLabel("Œ¯Ë·ÓÍ: 0");
-        start_button = new JButton("Õ‡˜‡Ú¸");
-        stop_button = new JButton("ŒÒÚ‡ÌÓ‚ËÚ¸");
+        speed_label = new JLabel("0 –°–∏–º–≤–æ–ª–æ–≤/–º–∏–Ω");
+        time_label = new JLabel("–í—Ä–µ–º—è: 0 –°–µ–∫");
+        mistake_label = new JLabel("–û—à–∏–±–æ–∫: 0");
+        start_button = new JButton("–ù–∞—á–∞—Ç—å");
+        stop_button = new JButton("–û—Å—Ç–∞–Ω–æ–≤–∏—Ç—å");
+        dowload_text_button = new JButton("–í—ã–±—Ä–∞—Ç—å —Ç–µ–∫—Å—Ç");
         scrollpane = new JScrollPane(task_panel);
 
         south_panel.setPreferredSize(new Dimension(300, 150));
@@ -53,61 +55,69 @@ public class TypingTest extends JFrame {
         scrollpane.setPreferredSize(new Dimension(400, 150));
         start_button.setPreferredSize(new Dimension(100, 20));
         stop_button.setPreferredSize(new Dimension(105, 20));
+        dowload_text_button.setPreferredSize(new Dimension(118, 20));
 
-        timer = new Timer(1000, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                task_panel.setTime((task_panel.getTime() + 1));
-                time_label.setText("¬ÂÏˇ: " + (int) task_panel.getTime() + " —ÂÍ");
-                speed_label.setText((int) task_panel.getSpeed() + " —ËÏ‚ÓÎÓ‚/ÏËÌ");
+        timer = new Timer(1000, (ActionEvent e) -> {
+            task_panel.setTime((task_panel.getTime() + 1));
+            time_label.setText("–í—Ä–µ–º—è: " + (int) task_panel.getTime() + " –°–µ–∫");
+            speed_label.setText((int) task_panel.getSpeed() + " –°–∏–º–≤–æ–ª–æ–≤/–º–∏–Ω");
 
-                if (task_panel.getTime() == 60) {
-                    try {
-                        task_panel.setStarted(false);
-                        timer.stop();
-                        task_panel.showInformationDialog();
-                        task_panel.reset();
-                    } catch (BadLocationException ex) {
-                    }
-                }
-            }
-        });
-
-        start_button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+            if (task_panel.getTime() == 60) {
                 try {
-                    task_panel.reset();
-                    mistake_label.setText("Œ¯Ë·ÓÍ: " + task_panel.getMistakes_count());
-
-                    task_panel.setStarted(true);
-                    timer.start();
-                    main_panel.requestFocus();
-                } catch (BadLocationException ex) {
-                }
-            }
-        });
-
-        stop_button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    timer.stop();
-                    if (task_panel.isStarted()) {
-                        task_panel.showInformationDialog();
-                    }
                     task_panel.setStarted(false);
+                    timer.stop();
+                    task_panel.showInformationDialog();
                     task_panel.reset();
                 } catch (BadLocationException ex) {
                 }
+            }
+        });
+
+        start_button.addActionListener((ActionEvent e) -> {
+            try {
+                task_panel.reset();
+                mistake_label.setText("–û—à–∏–±–æ–∫: " + task_panel.getMistakes_count());
+
+                task_panel.setStarted(true);
+                timer.start();
+                main_panel.requestFocus();
+            } catch (BadLocationException ex) {
+            }
+        });
+
+        stop_button.addActionListener((ActionEvent e) -> {
+            try {
+                timer.stop();
+                if (task_panel.isStarted()) {
+                    task_panel.showInformationDialog();
+                    task_panel.reset();
+                }
+                task_panel.setStarted(false);
+
+            } catch (BadLocationException ex) {
+            }
+        });
+
+        dowload_text_button.addActionListener((ActionEvent e) -> {
+            try {
+                task_panel.selectText();
+            } catch (UnsupportedEncodingException | FileNotFoundException | BadLocationException ex) {
             }
         });
 
         main_panel.addKeyListener(new KeyAdapter() {
+
+            @Override
             public void keyTyped(KeyEvent e) {
                 try {
-                    task_panel.typeDown(e);
-                    mistake_label.setText("Œ¯Ë·ÓÍ: " + task_panel.getMistakes_count());
+                    task_panel.typeKey(e);
+                    if (task_panel.textIsOutOfLength()) {
+                        timer.stop();
+                        task_panel.setStarted(false);
+                        task_panel.showInformationDialog();
+                        task_panel.reset();
+                    }
+                    mistake_label.setText("–û—à–∏–±–æ–∫: " + task_panel.getMistakes_count());
                 } catch (BadLocationException ex) {
                 }
             }
@@ -116,6 +126,7 @@ public class TypingTest extends JFrame {
         top_panel.add(scrollpane);
         center_panel.add(start_button);
         center_panel.add(stop_button);
+        center_panel.add(dowload_text_button);
         south_panel.add(speed_label);
         south_panel.add(time_label);
         south_panel.add(mistake_label);

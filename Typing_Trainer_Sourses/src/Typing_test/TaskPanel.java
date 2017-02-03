@@ -2,8 +2,17 @@ package Typing_test;
 
 import java.awt.Color;
 import java.awt.event.KeyEvent;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTextPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
@@ -13,11 +22,11 @@ import javax.swing.text.StyledDocument;
 
 public class TaskPanel extends JTextPane {
 
-    private String text = "“ÂÍÒÚ, ÍÓÚÓ˚È ÌÂÓ·ıÓ‰ËÏÓ Ì‡ÔÂ˜‡Ú‡Ú¸. “ÂÍÒÚ, ÍÓÚÓ˚È ÌÂÓ·ıÓ‰ËÏÓ Ì‡ÔÂ˜‡Ú‡Ú¸. "
-            + "“ÂÍÒÚ, ÍÓÚÓ˚È ÌÂÓ·ıÓ‰ËÏÓ Ì‡ÔÂ˜‡Ú‡Ú¸. “ÂÍÒÚ, ÍÓÚÓ˚È ÌÂÓ·ıÓ‰ËÏÓ Ì‡ÔÂ˜‡Ú‡Ú¸. “ÂÍÒÚ, ÍÓÚÓ˚È ÌÂÓ·ıÓ‰ËÏÓ Ì‡ÔÂ˜‡Ú‡Ú¸. "
-            + "“ÂÍÒÚ, ÍÓÚÓ˚È ÌÂÓ·ıÓ‰ËÏÓ Ì‡ÔÂ˜‡Ú‡Ú¸. “ÂÍÒÚ, ÍÓÚÓ˚È ÌÂÓ·ıÓ‰ËÏÓ Ì‡ÔÂ˜‡Ú‡Ú¸. “ÂÍÒÚ, ÍÓÚÓ˚È ÌÂÓ·ıÓ‰ËÏÓ Ì‡ÔÂ˜‡Ú‡Ú¸. "
-            + "“ÂÍÒÚ, ÍÓÚÓ˚È ÌÂÓ·ıÓ‰ËÏÓ Ì‡ÔÂ˜‡Ú‡Ú¸. “ÂÍÒÚ, ÍÓÚÓ˚È ÌÂÓ·ıÓ‰ËÏÓ Ì‡ÔÂ˜‡Ú‡Ú¸. “ÂÍÒÚ, ÍÓÚÓ˚È ÌÂÓ·ıÓ‰ËÏÓ Ì‡ÔÂ˜‡Ú‡Ú¸. "
-            + "“ÂÍÒÚ, ÍÓÚÓ˚È ÌÂÓ·ıÓ‰ËÏÓ Ì‡ÔÂ˜‡Ú‡Ú¸.";
+    private String text = "–¢–µ–∫—Å—Ç, –∫–æ—Ç–æ—Ä—ã–π –Ω–µ–æ–±—Ö–æ–¥–∏–º–æ –Ω–∞–ø–µ—á–∞—Ç–∞—Ç—å. –¢–µ–∫—Å—Ç, –∫–æ—Ç–æ—Ä—ã–π –Ω–µ–æ–±—Ö–æ–¥–∏–º–æ –Ω–∞–ø–µ—á–∞—Ç–∞—Ç—å. "
+            + "–¢–µ–∫—Å—Ç, –∫–æ—Ç–æ—Ä—ã–π –Ω–µ–æ–±—Ö–æ–¥–∏–º–æ –Ω–∞–ø–µ—á–∞—Ç–∞—Ç—å. –¢–µ–∫—Å—Ç, –∫–æ—Ç–æ—Ä—ã–π –Ω–µ–æ–±—Ö–æ–¥–∏–º–æ –Ω–∞–ø–µ—á–∞—Ç–∞—Ç—å. –¢–µ–∫—Å—Ç, –∫–æ—Ç–æ—Ä—ã–π –Ω–µ–æ–±—Ö–æ–¥–∏–º–æ –Ω–∞–ø–µ—á–∞—Ç–∞—Ç—å. "
+            + "–¢–µ–∫—Å—Ç, –∫–æ—Ç–æ—Ä—ã–π –Ω–µ–æ–±—Ö–æ–¥–∏–º–æ –Ω–∞–ø–µ—á–∞—Ç–∞—Ç—å. –¢–µ–∫—Å—Ç, –∫–æ—Ç–æ—Ä—ã–π –Ω–µ–æ–±—Ö–æ–¥–∏–º–æ –Ω–∞–ø–µ—á–∞—Ç–∞—Ç—å. –¢–µ–∫—Å—Ç, –∫–æ—Ç–æ—Ä—ã–π –Ω–µ–æ–±—Ö–æ–¥–∏–º–æ –Ω–∞–ø–µ—á–∞—Ç–∞—Ç—å. "
+            + "–¢–µ–∫—Å—Ç, –∫–æ—Ç–æ—Ä—ã–π –Ω–µ–æ–±—Ö–æ–¥–∏–º–æ –Ω–∞–ø–µ—á–∞—Ç–∞—Ç—å. –¢–µ–∫—Å—Ç, –∫–æ—Ç–æ—Ä—ã–π –Ω–µ–æ–±—Ö–æ–¥–∏–º–æ –Ω–∞–ø–µ—á–∞—Ç–∞—Ç—å. –¢–µ–∫—Å—Ç, –∫–æ—Ç–æ—Ä—ã–π –Ω–µ–æ–±—Ö–æ–¥–∏–º–æ –Ω–∞–ø–µ—á–∞—Ç–∞—Ç—å. "
+            + "–¢–µ–∫—Å—Ç, –∫–æ—Ç–æ—Ä—ã–π –Ω–µ–æ–±—Ö–æ–¥–∏–º–æ –Ω–∞–ø–µ—á–∞—Ç–∞—Ç—å.";
 
     private int typed_symbols_count, mistakes_count;
     private float time;
@@ -104,33 +113,54 @@ public class TaskPanel extends JTextPane {
     }
 
     public void showInformationDialog() {
-        JOptionPane.showMessageDialog(null, "¬ÂÏˇ: " + (int) time
-                + System.lineSeparator() + "—ÍÓÓÒÚ¸ Ì‡·Ó‡ ÚÂÍÒÚ‡: "
+        JOptionPane.showMessageDialog(null, "–í—Ä–µ–º—è: " + (int) time
+                + System.lineSeparator() + "–°–∫–æ—Ä–æ—Å—Ç—å –Ω–∞–±–æ—Ä–∞ —Ç–µ–∫—Å—Ç–∞: "
                 + (int) getSpeed() + System.lineSeparator()
-                + "Œ¯Ë·ÓÍ: " + mistakes_count
+                + "–û—à–∏–±–æ–∫: " + mistakes_count
         );
     }
 
     public boolean textIsOutOfLength() {
-        if (typed_symbols_count >= getDocument().getLength()) {
-            return true;
-        } else {
-            return false;
-        }
+        return typed_symbols_count >= getDocument().getLength();
     }
 
-    public void typeDown(KeyEvent e) throws BadLocationException {
+    public void typeKey(KeyEvent e) throws BadLocationException {
         if (started) {
             if (getSymbolAtCurrentPosintion().charAt(0) == (e.getKeyChar())) {
                 changeColorOfCurrentSymbol();
                 typed_symbols_count++;
-
-                if (textIsOutOfLength()) {
-                    reset();
-                }
             } else {
                 mistakes_count++;
+            }
+        }
+    }
 
+    public void selectText() throws FileNotFoundException, BadLocationException, UnsupportedEncodingException {
+
+        JFileChooser text_file_chooser = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
+        File file;
+        int state_of_file_chooser;
+
+        text_file_chooser.setFileFilter(filter);
+        state_of_file_chooser = text_file_chooser.showDialog(null, "–í—ã–±—Ä–∞—Ç—å —Ç–µ–∫—Å—Ç–æ–≤—ã–π —Ñ–∞–π–ª");
+        if (state_of_file_chooser == JFileChooser.APPROVE_OPTION) {
+            file = text_file_chooser.getSelectedFile();
+            BufferedReader br = new BufferedReader(
+                    new InputStreamReader(
+                            new FileInputStream(file), "windows-1251"));
+            StringBuilder sb = new StringBuilder();
+
+            try {
+                String s;
+                while ((s = br.readLine()) != null) {
+                    sb.append(s);
+                }
+                text = sb.toString();
+                reset();
+                br.close();
+
+            } catch (IOException ex) {
             }
         }
     }
