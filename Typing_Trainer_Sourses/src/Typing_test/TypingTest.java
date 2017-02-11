@@ -6,16 +6,23 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import static javax.swing.JFrame.EXIT_ON_CLOSE;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.Timer;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.BadLocationException;
 
 public class TypingTest extends JFrame {
@@ -100,7 +107,7 @@ public class TypingTest extends JFrame {
 
         dowload_text_button.addActionListener((ActionEvent e) -> {
             try {
-                task_panel.selectText();
+                task_panel.setDownloadedText(downloadText());
             } catch (UnsupportedEncodingException | FileNotFoundException | BadLocationException ex) {
             }
         });
@@ -110,14 +117,15 @@ public class TypingTest extends JFrame {
             @Override
             public void keyTyped(KeyEvent e) {
                 try {
-                    task_panel.typeKey(e);
-                    if (task_panel.textIsOutOfLength()) {
+                    task_panel.onKeyDown(e);
+                    if (task_panel.isTextOutOfLength() && task_panel.isStarted()) {
                         timer.stop();
                         task_panel.setStarted(false);
                         task_panel.showInformationDialog();
                         task_panel.reset();
                     }
-                    mistake_label.setText("Ошибок: " + task_panel.getMistakes_count());
+                    mistake_label.setText("Ошибок: "
+                            + task_panel.getMistakes_count());
                 } catch (BadLocationException ex) {
                 }
             }
@@ -139,6 +147,34 @@ public class TypingTest extends JFrame {
         setVisible(true);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
+    }
+
+    public String downloadText() throws FileNotFoundException,
+            BadLocationException, UnsupportedEncodingException {
+
+        JFileChooser text_file_chooser = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
+        File file;
+        int state_of_file_chooser;
+        StringBuilder sb = new StringBuilder();
+
+        text_file_chooser.setFileFilter(filter);
+        state_of_file_chooser = text_file_chooser.showDialog(null, "Выбрать текстовый файл");
+        if (state_of_file_chooser == JFileChooser.APPROVE_OPTION) {
+            file = text_file_chooser.getSelectedFile();
+            BufferedReader br = new BufferedReader(
+                    new InputStreamReader(
+                            new FileInputStream(file), "windows-1251"));
+            try {
+                String s;
+                while ((s = br.readLine()) != null) {
+                    sb.append(s);
+                }
+                br.close();
+            } catch (IOException ex) {
+            }
+        }
+        return sb.toString();
     }
 
     public static void main(String[] args) throws BadLocationException {

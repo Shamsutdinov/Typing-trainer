@@ -2,17 +2,8 @@ package Typing_test;
 
 import java.awt.Color;
 import java.awt.event.KeyEvent;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTextPane;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
@@ -34,38 +25,39 @@ public class TaskPanel extends JTextPane {
 
     public TaskPanel() throws BadLocationException {
         super();
+        started = false;
         setEditable(false);
         setFocusable(false);
     }
 
-    public void appendToPane(int pos, String msg, Color c) throws BadLocationException {
+    public void insertText(int pos, String inserted_char, Color c) throws BadLocationException {
         StyledDocument doc = getStyledDocument();
         StyleContext sc = StyleContext.getDefaultStyleContext();
         AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, c);
         setCharacterAttributes(aset, false);
-        doc.insertString(pos, msg, aset);
+        doc.insertString(pos, inserted_char, aset);
     }
 
     public String getSymbolAtCurrentPosintion() throws BadLocationException {
         return getText(typed_symbols_count, 1);
     }
 
-    public void changeColorOfCurrentSymbol() throws BadLocationException {
+    public void markCurrentSymbolAsTyped() throws BadLocationException {
         String character = getSymbolAtCurrentPosintion();
         getDocument().remove(typed_symbols_count, 1);
-        appendToPane(typed_symbols_count, character, Color.BLACK);
+        insertText(typed_symbols_count, character, Color.BLACK);
     }
 
-    public void clear() {
+    public void clearText() {
         setText(null);
     }
 
     public void reset() throws BadLocationException {
-        setText(null);
+        clearText();
         time = 0;
         typed_symbols_count = 0;
         mistakes_count = 0;
-        this.appendToPane(0, text, Color.RED);
+        insertText(0, text, Color.RED);
     }
 
     public float getSpeed() {
@@ -120,14 +112,14 @@ public class TaskPanel extends JTextPane {
         );
     }
 
-    public boolean textIsOutOfLength() {
+    public boolean isTextOutOfLength() {
         return typed_symbols_count >= getDocument().getLength();
     }
 
-    public void typeKey(KeyEvent e) throws BadLocationException {
+    public void onKeyDown(KeyEvent e) throws BadLocationException {
         if (started) {
             if (getSymbolAtCurrentPosintion().charAt(0) == (e.getKeyChar())) {
-                changeColorOfCurrentSymbol();
+                markCurrentSymbolAsTyped();
                 typed_symbols_count++;
             } else {
                 mistakes_count++;
@@ -135,33 +127,9 @@ public class TaskPanel extends JTextPane {
         }
     }
 
-    public void selectText() throws FileNotFoundException, BadLocationException, UnsupportedEncodingException {
+    public void setDownloadedText(String text) throws BadLocationException {
+        this.text = text;
+        reset();
 
-        JFileChooser text_file_chooser = new JFileChooser();
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
-        File file;
-        int state_of_file_chooser;
-
-        text_file_chooser.setFileFilter(filter);
-        state_of_file_chooser = text_file_chooser.showDialog(null, "Выбрать текстовый файл");
-        if (state_of_file_chooser == JFileChooser.APPROVE_OPTION) {
-            file = text_file_chooser.getSelectedFile();
-            BufferedReader br = new BufferedReader(
-                    new InputStreamReader(
-                            new FileInputStream(file), "windows-1251"));
-            StringBuilder sb = new StringBuilder();
-
-            try {
-                String s;
-                while ((s = br.readLine()) != null) {
-                    sb.append(s);
-                }
-                text = sb.toString();
-                reset();
-                br.close();
-
-            } catch (IOException ex) {
-            }
-        }
     }
 }
